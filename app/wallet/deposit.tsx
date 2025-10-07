@@ -1,9 +1,9 @@
 import { Redirect, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { BottomTabs, Tab } from "../../components/BottomTabs";
 import { useAuth } from "../../context/AuthContext";
 import { applyDelta, getBalance } from "../../lib/wallet";
-import { BottomTabs, Tab } from "../../components/BottomTabs";
 
 export default function DepositScreen() {
   const { user } = useAuth();
