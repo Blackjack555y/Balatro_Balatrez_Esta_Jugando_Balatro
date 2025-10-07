@@ -1,29 +1,32 @@
-import { Redirect } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, ImageBackground, StyleSheet, Text, View } from "react-native";
+import { FlatList, ImageBackground, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { BottomTabs } from "../../components/BottomTabs";
 import { useAuth } from "../../context/AuthContext";
-import { Bet, listOpenBets, subscribeBets } from "../../lib/bets";
+import { BetStats, listBets } from "../../lib/bets";
 
 export default function BetsScreen() {
   const { user } = useAuth();
-  const [bets, setBets] = useState<Bet[]>([]);
+  const router = useRouter();
+  const [bets, setBets] = useState<BetStats[]>([]);
+  const [tick, setTick] = useState(0);
+  const role = (user?.profile?.role ?? "jugador").toString().toLowerCase();
+  const isAdmin = role === "administrador";
 
   useEffect(() => {
     let mounted = true;
-    listOpenBets().then((rows) => mounted && setBets(rows)).catch(console.log);
-    const ch = subscribeBets((b) => {
-      setBets((prev) => {
-        const map = new Map(prev.map((x) => [x.id, x]));
-        map.set(b.id, { ...(map.get(b.id) || {}), ...b });
-        return Array.from(map.values()).sort((a, b) =>
-          String(b.closes_at || b.starts_at || "") > String(a.closes_at || a.starts_at || "") ? 1 : -1
-        );
-      });
-    });
+    const fetchOnce = () => listBets().then((rows: BetStats[]) => mounted && setBets(rows)).catch(console.log);
+    fetchOnce();
+    const poll = setInterval(fetchOnce, 5000);
     return () => {
       mounted = false;
-      ch.unsubscribe();
+      clearInterval(poll);
     };
+  }, []);
+
+  useEffect(() => {
+    const int = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(int);
   }, []);
 
   if (!user) return <Redirect href="/" />;
@@ -31,29 +34,60 @@ export default function BetsScreen() {
   return (
     <ImageBackground source={require("../../assets/wood.jpg")} style={{ flex: 1 }} resizeMode="repeat">
       <View style={styles.container}>
-        <Text style={styles.title}>APUESTAS EN TIEMPO REAL</Text>
+        <View style={styles.headerRow}>
+    <Text style={styles.title}>LIVE BETS</Text>
+          {isAdmin && (
+            <TouchableOpacity style={styles.newBtn} onPress={() => router.push("/bets/new" as any)}>
+      <Text style={styles.newBtnText}>New bet</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <FlatList
           data={bets}
-          keyExtractor={(x) => String(x.id)}
+          keyExtractor={(x) => `${x.id}-${tick}`}
           renderItem={({ item }) => (
-            <View style={styles.bet}>
+            <TouchableOpacity style={styles.bet} onPress={() => router.push(`/bets/${item.id}` as any)}>
               <Text style={styles.betTitle}>{item.title}</Text>
               {item.description ? <Text>{item.description}</Text> : null}
-              <Text style={styles.badge}>{item.status.toUpperCase()}</Text>
-            </View>
+        <Text style={styles.badge}>Status: {item.status.toUpperCase()}</Text>
+              {item.closes_at ? (
+                <Text style={styles.badge}>
+          Closes in: {(() => {
+                    const diff = new Date(item.closes_at!).getTime() - Date.now();
+                    if (diff <= 0) return "CERRADA";
+                    const s = Math.floor(diff / 1000);
+                    const m = Math.floor(s / 60);
+                    const sec = s % 60;
+                    return `${m}:${String(sec).padStart(2, "0")}`;
+                  })()}
+                </Text>
+              ) : null}
+            </TouchableOpacity>
           )}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           contentContainerStyle={{ paddingVertical: 12 }}
         />
       </View>
+      <BottomTabs
+        tabs={[
+          { id: 1, name: "Rules",   icon: require("../../assets/tab_1.png"),      onPress: () => router.push("/rules" as any) },
+          { id: 2, name: "Solo",    icon: require("../../assets/tab_2.png"),      onPress: () => router.push("/solo" as any) },
+          { id: 3, name: "Home",    icon: require("../../assets/tab_home.png"),   onPress: () => router.push("/home" as any) },
+          { id: 4, name: "Chat",    icon: require("../../assets/tab_4.png"),      onPress: () => router.push("/chat" as any) },
+          { id: 5, name: "Profile", icon: require("../../assets/tab_profile.png"),onPress: () => router.push("/profile" as any) },
+        ]}
+      />
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
+  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   title: { fontWeight: "900", fontSize: 18, letterSpacing: 1, textTransform: "uppercase", color: "#fff" },
   bet: { backgroundColor: "#e6d2b5", borderWidth: 3, borderColor: "#000", padding: 12, borderRadius: 8 },
   betTitle: { fontWeight: "900" },
   badge: { marginTop: 6, fontWeight: "900" },
+  newBtn: { paddingHorizontal: 10, paddingVertical: 6, borderWidth: 2, borderColor: "#000", backgroundColor: "#e6d2b5" },
+  newBtnText: { fontWeight: "bold", color: "#000" },
 });

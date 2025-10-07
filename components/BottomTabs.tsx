@@ -1,5 +1,6 @@
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type Tab = {
   id: number;
@@ -9,8 +10,9 @@ export type Tab = {
 };
 
 export function BottomTabs({ tabs, style }: { tabs: Tab[]; style?: ViewStyle }) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.bottomBar, style]}>
+    <View style={[styles.bottomBar, { paddingBottom: 10 + insets.bottom }, style]}>
       {tabs.map((tab) => (
         <TouchableOpacity key={tab.id} style={styles.tabButton} onPress={tab.onPress ?? (() => {})}>
           <Image source={tab.icon} style={styles.tabIcon} />
@@ -23,14 +25,14 @@ export function BottomTabs({ tabs, style }: { tabs: Tab[]; style?: ViewStyle }) 
 
 const styles = StyleSheet.create({
   bottomBar: {
-    height: 80,
+    minHeight: 70,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     borderTopWidth: 3,
     borderColor: "#000",
     backgroundColor: "rgba(0, 0, 0, 0.8)",
-    paddingBottom: 10,
+    paddingTop: 8,
   },
   tabButton: { flex: 1, alignItems: "center" },
   tabIcon: { width: 48, height: 48, resizeMode: "contain" },

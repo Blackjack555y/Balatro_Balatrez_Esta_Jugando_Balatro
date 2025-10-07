@@ -1,17 +1,9 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    ImageBackground,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { Conversation, listConversations, toNumberId } from "../../lib/chat";
+import { BottomTabs } from "../../components/BottomTabs";
 
 export default function ChatListScreen() {
   const { user } = useAuth();
@@ -95,7 +87,15 @@ export default function ChatListScreen() {
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
         />
       )}
-      <View style={styles.bottomBar} />
+      <BottomTabs
+        tabs={[
+          { id: 1, name: "Rules",   icon: require("../../assets/tab_1.png"),      onPress: () => router.push("/rules" as any) },
+          { id: 2, name: "Solo",    icon: require("../../assets/tab_2.png"),      onPress: () => router.push("/solo" as any) },
+          { id: 3, name: "Home",    icon: require("../../assets/tab_home.png"),   onPress: () => router.push("/home" as any) },
+          { id: 4, name: "Chat",    icon: require("../../assets/tab_4.png"),      onPress: () => router.push("/chat" as any) },
+          { id: 5, name: "Profile", icon: require("../../assets/tab_profile.png"),onPress: () => router.push("/profile" as any) },
+        ]}
+      />
     </ImageBackground>
   );
 }
@@ -113,12 +113,6 @@ const styles = StyleSheet.create({
   },
   newBtn: { position: "absolute", right: 10, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 2, borderColor: "#000", backgroundColor: "#e6d2b5" },
   newBtnText: { fontWeight: "bold", color: "#000" },
-  bottomBar: {
-    height: 10,
-    borderTopWidth: 3,
-    borderColor: "#000",
-    backgroundColor: "rgba(0,0,0,0.8)",
-  },
   barText: {
     fontSize: 14,
     fontWeight: "bold",

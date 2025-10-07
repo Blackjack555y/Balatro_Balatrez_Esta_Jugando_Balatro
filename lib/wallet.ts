@@ -45,6 +45,25 @@ export async function applyDelta(userId: number, delta: number, reason = "adjust
   return data as number; // nuevo saldo
 }
 
+export async function applyDeltaRef(
+  userId: number,
+  delta: number,
+  reason: string,
+  ref: { type: string; id?: number | null },
+  meta?: any
+) {
+  const { data, error } = await supabase.rpc("wallet_apply_delta", {
+    p_user_id: userId,
+    p_delta: delta,
+    p_reason: reason,
+    p_ref_type: ref.type,
+    p_ref_id: ref.id ?? null,
+    p_meta: meta ?? null,
+  });
+  if (error) throw error;
+  return data as number;
+}
+
 export function subscribeWallet(userId: number, onChange: (tx: WalletTx) => void) {
   const channel = supabase
     .channel(`wallet_user_${userId}`)

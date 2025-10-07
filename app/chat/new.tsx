@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { Peer, listPeersExcept, toNumberId } from "../../lib/chat";
+import { BottomTabs } from "../../components/BottomTabs";
 
 export default function NewChatScreen() {
   const { user } = useAuth();
@@ -69,6 +70,15 @@ export default function NewChatScreen() {
           contentContainerStyle={{ padding: 10 }}
         />
       )}
+      <BottomTabs
+        tabs={[
+          { id: 1, name: "Rules",   icon: require("../../assets/tab_1.png"),      onPress: () => router.push("/rules" as any) },
+          { id: 2, name: "Solo",    icon: require("../../assets/tab_2.png"),      onPress: () => router.push("/solo" as any) },
+          { id: 3, name: "Home",    icon: require("../../assets/tab_home.png"),   onPress: () => router.push("/home" as any) },
+          { id: 4, name: "Chat",    icon: require("../../assets/tab_4.png"),      onPress: () => router.push("/chat" as any) },
+          { id: 5, name: "Profile", icon: require("../../assets/tab_profile.png"),onPress: () => router.push("/profile" as any) },
+        ]}
+      />
     </ImageBackground>
   );
 }

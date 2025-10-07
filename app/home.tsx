@@ -2,6 +2,7 @@
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 
 type Tab = {
@@ -14,9 +15,8 @@ type Tab = {
 export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
-  const role = (user?.profile?.role ?? "jugador").toString().toLowerCase();
-  const isAdmin = role === "administrador";
 
   useEffect(() => {
     if (!user) {
@@ -29,25 +29,25 @@ export default function HomeScreen() {
       id: 1,
       title: "Juegos",
       image: require("./adder.png"),
-      onPress: () => router.push((isAdmin ? "/rules/spades" : "/solo") as any),
+  onPress: () => router.push("/solo" as any),
     },
     {
       id: 2,
       title: "Apuestas",
       image: require("./squirrel.png"),
-      onPress: () => router.push((isAdmin ? "/rules/hearts" : "/bets") as any),
+  onPress: () => router.push("/bets" as any),
     },
     {
       id: 3,
       title: "Wallet",
       image: require("./starvation.png"),
-      onPress: () => router.push((isAdmin ? "/rules/clubs" : "/wallet") as any),
+  onPress: () => router.push("/wallet" as any),
     },
     {
       id: 4,
-      title: "Settings",
+  title: "Chat",
       image: require("./wolf.png"),
-      onPress: () => router.push(isAdmin ? "/rules/diamonds" : "/rules"),
+  onPress: () => router.push("/chat" as any),
     },
   ];
 
@@ -72,7 +72,7 @@ export default function HomeScreen() {
     },
     {
       id: 4,
-      name: "Tab4",
+      name: "Chat",
       icon: require("../assets/tab_4.png"),
       onPress: () => router.push("/chat" as any),
     },
@@ -86,7 +86,7 @@ export default function HomeScreen() {
 
   return (
     <ImageBackground source={require("../assets/wood.jpg")} style={styles.container} resizeMode="repeat">
-      <View style={styles.topBar}>
+  <View style={[styles.topBar, { paddingTop: insets.top }]}>
         <Text style={styles.barText}>☠️ Inscryption Clone</Text>
       </View>
 
@@ -103,7 +103,7 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      <View style={styles.bottomBar}>
+  <View style={[styles.bottomBar, { paddingBottom: 10 + insets.bottom }]}>
         {tabs.map((tab) => (
           <TouchableOpacity key={tab.id} style={styles.tabButton} onPress={tab.onPress ?? (() => {})}>
             <Image source={tab.icon} style={styles.tabIcon} />
@@ -118,7 +118,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   topBar: {
-    height: 50,
+    minHeight: 50,
     justifyContent: "center",
     alignItems: "center",
     borderBottomWidth: 3,
@@ -126,14 +126,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(244, 225, 210, 0.9)",
   },
   bottomBar: {
-    height: 80,
+    minHeight: 70,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     borderTopWidth: 3,
     borderColor: "#000",
     backgroundColor: "rgba(0, 0, 0, 0.8)",
-    paddingBottom: 10,
+    paddingTop: 8,
   },
   barText: {
     fontSize: 14,
