@@ -1,9 +1,12 @@
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Alert, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { BottomTabs } from "../../components/BottomTabs";
+import { LoadingOverlay } from "../../components/LoadingOverlay";
+import { SuccessOverlay } from "../../components/SuccessOverlay";
 import { useAuth } from "../../context/AuthContext";
 import { BetParticipant, BetStats, getBet, joinBet, listParticipantsDetailed, settleBet } from "../../lib/bets";
-import { BottomTabs } from "../../components/BottomTabs";
+import { addReview, listReviews, ReviewDetail } from "../../lib/reviews";
 
 export default function BetDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -12,6 +15,10 @@ export default function BetDetail() {
   const [bet, setBet] = useState<BetStats | null>(null);
   const [parts, setParts] = useState<BetParticipant[]>([]);
   const [tick, setTick] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [reviews, setReviews] = useState<ReviewDetail[]>([]);
+  const [newReview, setNewReview] = useState("");
   const role = (user?.profile?.role ?? "jugador").toString().toLowerCase();
   const isAdmin = role === "administrador";
 
@@ -31,6 +38,16 @@ export default function BetDetail() {
     return () => clearInterval(int);
   }, []);
 
+  const refreshReviews = useCallback(async () => {
+    if (!id) return;
+    const rs = await listReviews(Number(id));
+    setReviews(rs);
+  }, [id]);
+
+  useEffect(() => {
+    refreshReviews().catch(() => {});
+  }, [refreshReviews]);
+
   const closesIn = (() => {
     if (!bet?.closes_at) return "";
     const diff = Math.max(0, new Date(bet.closes_at).getTime() - Date.now());
@@ -41,20 +58,27 @@ export default function BetDetail() {
 
   const onJoin = async () => {
     try {
+      setPending(true);
       await joinBet(Number(id), Number(user!.id), 1);
       await refresh();
+  setShowSuccess(true);
     } catch (e: any) {
       Alert.alert("Error", e.message ?? "No se pudo unir");
+    } finally {
+      setPending(false);
     }
   };
 
   const onSettle = async () => {
     try {
+      setPending(true);
       const res = await settleBet(Number(id));
       Alert.alert("Liquidada", JSON.stringify(res));
       router.replace("/bets" as any);
     } catch (e: any) {
       Alert.alert("Error", e.message ?? "No se pudo liquidar");
+    } finally {
+      setPending(false);
     }
   };
 
@@ -70,6 +94,43 @@ export default function BetDetail() {
             <Text style={styles.title}>{bet.title}</Text>
             <Text style={styles.note}>Prize: {bet.prize_amount} bones • Participants: {bet.participants_count}</Text>
             {bet.closes_at && <Text style={styles.note} key={`tick-${tick}`}>Closes in: {closesIn}</Text>}
+            <Text style={styles.section}>Reviews</Text>
+            <ScrollView style={{ maxHeight: 200, marginBottom: 8 }}>
+              {reviews.map((r) => (
+                <View key={r.id} style={{ marginBottom: 8 }}>
+                  <Text style={{ color: "#fff", fontWeight: "800" }}>{r.nickname ?? r.username ?? `User ${r.user_id}`}</Text>
+                  <Text style={{ color: "#fff" }}>{r.content}</Text>
+                </View>
+              ))}
+              {reviews.length === 0 && <Text style={styles.note}>No reviews yet.</Text>}
+            </ScrollView>
+            <View style={{ gap: 8 }}>
+              <TextInput
+                placeholder="Write a review"
+                placeholderTextColor="#333"
+                value={newReview}
+                onChangeText={setNewReview}
+                style={styles.input}
+              />
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: "#2e7d32" }]}
+                onPress={async () => {
+                  if (!newReview.trim()) return;
+                  try {
+                    setPending(true);
+                    await addReview(Number(id), Number(user!.id), newReview.trim());
+                    setNewReview("");
+                    await refreshReviews();
+                  } catch (e: any) {
+                    Alert.alert("Error", e.message ?? "No se pudo guardar");
+                  } finally {
+                    setPending(false);
+                  }
+                }}
+              >
+                <Text style={styles.buttonText}>Submit review</Text>
+              </TouchableOpacity>
+            </View>
 
             <Text style={styles.section}>Participants</Text>
             <View style={{ gap: 8 }}>
@@ -99,6 +160,12 @@ export default function BetDetail() {
           </>
         )}
       </View>
+      <SuccessOverlay
+        visible={showSuccess}
+        text="Joined!"
+        onFinished={() => setShowSuccess(false)}
+      />
+  <LoadingOverlay visible={pending} text="Processing..." />
       <BottomTabs
         tabs={[
           { id: 1, name: "Rules",   icon: require("../../assets/tab_1.png"),      onPress: () => router.push("/rules" as any) },
@@ -123,4 +190,7 @@ const styles = StyleSheet.create({
   partText: { color: "#fff", fontWeight: "900" },
   button: { backgroundColor: "#000", padding: 12, borderRadius: 8, borderWidth: 3, borderColor: "#000", marginTop: 12 },
   buttonText: { color: "#fff", fontWeight: "900", textAlign: "center" },
+  modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center", padding: 16 },
+  modalCard: { backgroundColor: "#e6d2b5", borderWidth: 3, borderColor: "#000", padding: 16, borderRadius: 12, width: "100%" },
+  input: { backgroundColor: "#fff", borderWidth: 2, borderColor: "#000", borderRadius: 8, padding: 10 },
 });

@@ -1,9 +1,9 @@
 import { Redirect, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { BottomTabs } from "../../components/BottomTabs";
 import { useAuth } from "../../context/AuthContext";
 import { Peer, listPeersExcept, toNumberId } from "../../lib/chat";
-import { BottomTabs } from "../../components/BottomTabs";
 
 export default function NewChatScreen() {
   const { user } = useAuth();

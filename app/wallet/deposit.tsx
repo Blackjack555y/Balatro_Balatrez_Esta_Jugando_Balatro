@@ -2,6 +2,8 @@ import { Redirect, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { BottomTabs, Tab } from "../../components/BottomTabs";
+import { LoadingOverlay } from "../../components/LoadingOverlay";
+import { SuccessOverlay } from "../../components/SuccessOverlay";
 import { useAuth } from "../../context/AuthContext";
 import { applyDelta, getBalance } from "../../lib/wallet";
 
@@ -9,6 +11,8 @@ export default function DepositScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const [amount, setAmount] = useState("10");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [pending, setPending] = useState(false);
 
   if (!user) return <Redirect href="/" />;
 
@@ -18,15 +22,19 @@ export default function DepositScreen() {
     const n = Math.max(0, Math.floor(Number(amount)));
     if (!n) return Alert.alert("Monto inválido", "Ingresa un número mayor a 0");
     try {
+      setPending(true);
       await applyDelta(userId, n, "deposit");
-      const b = await getBalance(userId);
-      Alert.alert("Depósito realizado", `Nuevo saldo: ${b} bones`, [{ text: "OK", onPress: () => router.back() }]);
+      await getBalance(userId);
+      setShowSuccess(true);
     } catch (e: any) {
       Alert.alert("Error", e.message ?? "No se pudo depositar");
+    } finally {
+      setPending(false);
     }
   };
 
   return (
+    <>
     <ImageBackground source={require("../../assets/wood.jpg")} style={{ flex: 1 }} resizeMode="repeat">
       <View style={styles.container}>
         <Text style={styles.title}>DEPOSITAR BONES</Text>
@@ -55,7 +63,13 @@ export default function DepositScreen() {
           { id: 5, name: "Profile",icon: require("../../assets/tab_profile.png"),onPress: () => router.push("/profile" as any) },
         ] as Tab[]}
       />
-    </ImageBackground>
+  </ImageBackground>
+  <SuccessOverlay visible={showSuccess} text="Deposit successful" onFinished={() => {
+      setShowSuccess(false);
+      router.back();
+  }} />
+  <LoadingOverlay visible={pending} text="Processing deposit..." />
+  </>
   );
 }
 

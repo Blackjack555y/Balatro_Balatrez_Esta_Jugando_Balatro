@@ -14,9 +14,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomTabs } from "../../components/BottomTabs";
 import { useAuth } from "../../context/AuthContext";
 import { Message, getThreadMessages, sendMessage, subscribeToThread, toNumberId } from "../../lib/chat";
-import { BottomTabs } from "../../components/BottomTabs";
 
 export default function ChatThreadScreen() {
     const { user } = useAuth();
