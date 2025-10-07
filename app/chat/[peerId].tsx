@@ -1,25 +1,25 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import {
-    Message,
-    getThreadMessages,
-    sendMessage,
-    subscribeToThread,
-    toNumberId,
+  Message,
+  getThreadMessages,
+  sendMessage,
+  subscribeToThread,
+  toNumberId,
 } from "../../lib/chat";
 
 export default function ChatThreadScreen() {
@@ -63,7 +63,7 @@ export default function ChatThreadScreen() {
 
   useEffect(() => {
     if (myNumeric == null || peerNumeric == null) return;
-    const ch = subscribeToThread(myNumeric, peerNumeric, (msg) => {
+    const ch = subscribeToThread(myNumeric, peerNumeric, (msg: Message) => {
       // prevent dupes by id
       setMessages((prev) => {
         if (prev.find((m) => m.id === msg.id)) return prev;

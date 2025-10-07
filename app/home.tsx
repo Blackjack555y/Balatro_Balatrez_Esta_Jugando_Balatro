@@ -15,11 +15,9 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
 
-  // rol opcional desde profile
   const role = (user?.profile?.role ?? "jugador").toString().toLowerCase();
   const isAdmin = role === "administrador";
 
-  // protege la ruta
   useEffect(() => {
     if (!user) {
       router.replace("/");
@@ -29,21 +27,21 @@ export default function HomeScreen() {
   const cards = [
     {
       id: 1,
-      title: "Story Mode",
+      title: "Juegos",
       image: require("./adder.png"),
-      onPress: () => router.push(isAdmin ? "/rules/spades" : "/rules"),
+      onPress: () => router.push((isAdmin ? "/rules/spades" : "/solo") as any),
     },
     {
       id: 2,
-      title: "Endless",
+      title: "Apuestas",
       image: require("./squirrel.png"),
-      onPress: () => router.push(isAdmin ? "/rules/hearts" : "/rules"),
+      onPress: () => router.push((isAdmin ? "/rules/hearts" : "/bets") as any),
     },
     {
       id: 3,
-      title: "Multiplayer",
+      title: "Wallet",
       image: require("./starvation.png"),
-      onPress: () => router.push(isAdmin ? "/rules/clubs" : "/rules"),
+      onPress: () => router.push((isAdmin ? "/rules/clubs" : "/wallet") as any),
     },
     {
       id: 4,
@@ -58,7 +56,7 @@ export default function HomeScreen() {
       id: 1,
       name: "Rules",
       icon: require("../assets/tab_1.png"),
-      onPress: () => router.push("/rules" as any), // cast para evitar error TS
+      onPress: () => router.push("/rules" as any),
     },
     {
       id: 2,
@@ -87,17 +85,11 @@ export default function HomeScreen() {
   ];
 
   return (
-    <ImageBackground
-      source={require("../assets/wood.jpg")}
-      style={styles.container}
-      resizeMode="repeat"
-    >
-      {/* Barra superior */}
+    <ImageBackground source={require("../assets/wood.jpg")} style={styles.container} resizeMode="repeat">
       <View style={styles.topBar}>
         <Text style={styles.barText}>☠️ Inscryption Clone</Text>
       </View>
 
-      {/* Zona principal con cartas */}
       <View style={styles.grid}>
         {cards.map((card) => (
           <TouchableOpacity
@@ -111,14 +103,9 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* Barra inferior con Tabs */}
       <View style={styles.bottomBar}>
         {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.id}
-            style={styles.tabButton}
-            onPress={tab.onPress ?? (() => console.log(`Tab selected: ${tab.name}`))}
-          >
+          <TouchableOpacity key={tab.id} style={styles.tabButton} onPress={tab.onPress ?? (() => {})}>
             <Image source={tab.icon} style={styles.tabIcon} />
             <Text style={styles.tabLabel}>{tab.name}</Text>
           </TouchableOpacity>
@@ -168,11 +155,7 @@ const styles = StyleSheet.create({
     margin: 10,
     alignItems: "center",
   },
-  cardImage: {
-    width: 140,
-    height: 200,
-    resizeMode: "contain",
-  },
+  cardImage: { width: 140, height: 200, resizeMode: "contain" },
   cardTitle: {
     marginTop: 5,
     color: "#fff",
@@ -181,19 +164,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
   },
-  tabButton: {
-    flex: 1,
-    alignItems: "center",
-  },
-  tabIcon: {
-    width: 48,
-    height: 48,
-    resizeMode: "contain",
-  },
-  tabLabel: {
-    fontSize: 10,
-    color: "#fff",
-    marginTop: 4,
-    textTransform: "uppercase",
-  },
+  tabButton: { flex: 1, alignItems: "center" },
+  tabIcon: { width: 48, height: 48, resizeMode: "contain" },
+  tabLabel: { fontSize: 10, color: "#fff", marginTop: 4, textTransform: "uppercase" },
 });
