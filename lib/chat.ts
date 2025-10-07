@@ -6,6 +6,7 @@ export type Peer = {
   user_id: number;
   nickname?: string;
   avatar_url?: string;
+  username?: string;
 };
 
 export type Message = {
@@ -70,6 +71,31 @@ export async function listConversations(userId: number): Promise<Conversation[]>
 
   // Already sorted by latest message first via msgs descending order
   return items;
+}
+
+// List potential peers to start a new chat with (excludes current user)
+export async function listPeersExcept(
+  myUserId: number,
+  opts?: { search?: string; limit?: number }
+): Promise<Peer[]> {
+  const limit = opts?.limit ?? 100;
+
+  let query = supabase
+    .from("profiles")
+    .select("user_id,nickname,avatar_url")
+    .neq("user_id", myUserId)
+    .order("nickname", { ascending: true, nullsFirst: false })
+    .limit(limit);
+
+  if (opts?.search && opts.search.trim()) {
+    const q = opts.search.trim();
+    // Try to match by nickname; if numeric try by user_id
+    query = query.ilike("nickname", `%${q}%`);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as unknown as Peer[];
 }
 
 // Fetch a thread's messages between two users

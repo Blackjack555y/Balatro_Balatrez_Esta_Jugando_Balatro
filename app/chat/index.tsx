@@ -78,6 +78,9 @@ export default function ChatListScreen() {
     >
       <View style={styles.topBar}>
         <Text style={styles.barText}>Messages</Text>
+        <TouchableOpacity style={styles.newBtn} onPress={() => router.push("/chat/new" as any)}>
+          <Text style={styles.newBtnText}>Nuevo chat</Text>
+        </TouchableOpacity>
       </View>
       {loading ? (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -106,7 +109,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 3,
     borderColor: "#000",
     backgroundColor: "rgba(244, 225, 210, 0.9)",
+    flexDirection: "row",
   },
+  newBtn: { position: "absolute", right: 10, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 2, borderColor: "#000", backgroundColor: "#e6d2b5" },
+  newBtnText: { fontWeight: "bold", color: "#000" },
   bottomBar: {
     height: 10,
     borderTopWidth: 3,
