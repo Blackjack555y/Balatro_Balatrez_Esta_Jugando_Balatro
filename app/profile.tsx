@@ -3,7 +3,7 @@ import * as Device from "expo-device";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { Redirect, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -139,18 +139,10 @@ export default function ProfileScreen() {
   const [editNickname, setEditNickname] = useState("");
   const [editBio, setEditBio] = useState("");
 
-  if (!user) {
-    return <Redirect href="/" />;
-  }
-
-  useEffect(() => {
-    fetchProfile();
-  }, [user]);
-
-  async function fetchProfile() {
+  const fetchProfile = useCallback(async () => {
     setLoading(true);
     try {
-      const uidNum = toNumericUserId((user as any).id);
+      const uidNum = toNumericUserId((user as any)?.id);
       if (uidNum === null) {
         console.warn("fetchProfile: user.id no es numérico:", (user as any).id);
         setProfile(null);
@@ -172,6 +164,15 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
+  }, [user]);
+
+  useEffect(() => {
+    // Always call hooks at the top-level; redirect handled in render.
+    fetchProfile();
+  }, [fetchProfile]);
+
+  if (!user) {
+    return <Redirect href="/" />;
   }
 
   const saveProfile = async () => {

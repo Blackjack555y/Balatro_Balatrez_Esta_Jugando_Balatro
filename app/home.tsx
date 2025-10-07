@@ -15,18 +15,42 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
 
+  // rol opcional desde profile
+  const role = (user?.profile?.role ?? "jugador").toString().toLowerCase();
+  const isAdmin = role === "administrador";
+
   // protege la ruta
   useEffect(() => {
     if (!user) {
       router.replace("/");
     }
-  }, [user]);
+  }, [user, router]);
 
   const cards = [
-    { id: 1, title: "Story Mode", image: require("./adder.png") },
-    { id: 2, title: "Endless", image: require("./squirrel.png") },
-    { id: 3, title: "Multiplayer", image: require("./starvation.png") },
-    { id: 4, title: "Settings", image: require("./wolf.png") },
+    {
+      id: 1,
+      title: "Story Mode",
+      image: require("./adder.png"),
+      onPress: () => router.push(isAdmin ? "/rules/spades" : "/rules"),
+    },
+    {
+      id: 2,
+      title: "Endless",
+      image: require("./squirrel.png"),
+      onPress: () => router.push(isAdmin ? "/rules/hearts" : "/rules"),
+    },
+    {
+      id: 3,
+      title: "Multiplayer",
+      image: require("./starvation.png"),
+      onPress: () => router.push(isAdmin ? "/rules/clubs" : "/rules"),
+    },
+    {
+      id: 4,
+      title: "Settings",
+      image: require("./wolf.png"),
+      onPress: () => router.push(isAdmin ? "/rules/diamonds" : "/rules"),
+    },
   ];
 
   const tabs: Tab[] = [
@@ -79,7 +103,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             key={card.id}
             style={styles.cardContainer}
-            onPress={() => console.log(`Selected ${card.title}`)}
+            onPress={card.onPress ?? (() => console.log(`Selected ${card.title}`))}
           >
             <Image source={card.image} style={styles.cardImage} />
             <Text style={styles.cardTitle}>{card.title}</Text>

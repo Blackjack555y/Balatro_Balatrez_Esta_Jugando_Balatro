@@ -20,6 +20,7 @@ type Profile = {
   games_played: number;
   games_won: number;
   high_score: number;
+  role?: string | null; // 'player' | 'admin' stored in profiles table
 };
 
 type AuthContextType = {
@@ -159,7 +160,8 @@ const register = async (
         bones: 0, // iniciar con 0
         games_played: 0,
         games_won: 0,
-        high_score: 0,
+  high_score: 0,
+  role: 'jugador',
       })
       .select()
       .single();
