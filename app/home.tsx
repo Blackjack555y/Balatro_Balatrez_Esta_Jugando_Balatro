@@ -74,7 +74,7 @@ export default function HomeScreen() {
       id: 4,
       name: "Tab4",
       icon: require("../assets/tab_4.png"),
-      onPress: () => console.log("Tab4 pressed"),
+      onPress: () => router.push("/chat" as any),
     },
     {
       id: 5,

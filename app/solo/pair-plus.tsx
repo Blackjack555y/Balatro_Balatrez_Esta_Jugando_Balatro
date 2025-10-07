@@ -1,4 +1,4 @@
-import { Redirect } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
@@ -20,6 +20,7 @@ const PAY_TABLE: Record<string, number> = {
 
 export default function PairPlus() {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [bet, setBet] = useState(10);
   const [balance, setBalance] = useState(0);
@@ -73,6 +74,9 @@ export default function PairPlus() {
   return (
     <ImageBackground source={require("../../assets/wood.jpg")} style={{ flex: 1 }} resizeMode="repeat">
       <View style={styles.container}>
+        <TouchableOpacity onPress={() => router.back()} style={{ alignSelf: "flex-start" }}>
+          <Text style={{ color: "#fff", fontWeight: "900" }}>{"< VOLVER"}</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>PAR O MEJOR</Text>
         <Text style={styles.subtitle}>Saldo: {balance} — Apuesta: {bet} bones</Text>
 

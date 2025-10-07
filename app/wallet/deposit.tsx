@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Alert, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { applyDelta, getBalance } from "../../lib/wallet";
+import { BottomTabs, Tab } from "../../components/BottomTabs";
 
 export default function DepositScreen() {
   const { user } = useAuth();
@@ -45,6 +46,15 @@ export default function DepositScreen() {
           <Text style={styles.btnLabel}>CANCELAR</Text>
         </TouchableOpacity>
       </View>
+      <BottomTabs
+        tabs={[
+          { id: 1, name: "Rules",  icon: require("../../assets/tab_1.png"),     onPress: () => router.push("/rules" as any) },
+          { id: 2, name: "Solo",   icon: require("../../assets/tab_2.png"),     onPress: () => router.push("/solo" as any) },
+          { id: 3, name: "Home",   icon: require("../../assets/tab_home.png"),  onPress: () => router.push("/home" as any) },
+          { id: 4, name: "Chat",   icon: require("../../assets/tab_4.png"),     onPress: () => router.push("/chat" as any) },
+          { id: 5, name: "Profile",icon: require("../../assets/tab_profile.png"),onPress: () => router.push("/profile" as any) },
+        ] as Tab[]}
+      />
     </ImageBackground>
   );
 }
